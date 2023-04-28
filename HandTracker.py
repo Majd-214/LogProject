@@ -26,9 +26,9 @@ with open('dist/RUNTIME DATA/Resources/Corners.yaml', 'r') as openfile:
     # Reading from YAML file
     points = yaml.load(openfile, Loader=yaml.FullLoader)
 
-src = np.float32([(points["Top Left"]["X"], points["Top Left"]["Y"]),
+src = np.float32([(points["Top Fisheye"]["X"], points["Top Fisheye"]["Y"]),
                   (points["Top Right"]["X"], points["Top Right"]["Y"]),
-                  (points["Bottom Left"]["X"], points["Bottom Left"]["Y"]),
+                  (points["Bottom Fisheye"]["X"], points["Bottom Fisheye"]["Y"]),
                   (points["Bottom Right"]["X"], points["Bottom Right"]["Y"])])
 mod = np.float32([[crop_offset, crop_offset], [cam_width - crop_offset, crop_offset],
                   [crop_offset, cam_height - crop_offset], [cam_width - crop_offset, cam_height - crop_offset]])

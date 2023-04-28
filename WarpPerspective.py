@@ -58,9 +58,9 @@ while True:
     # SAVE IMAGE WHEN 's' key is pressed
     if cv2.waitKey(1) & 0xFF == ord('s'):
         data = {
-            'Top Left': {'X': int(biggest[0][0][0]), 'Y': int(biggest[0][0][1])},
+            'Top Fisheye': {'X': int(biggest[0][0][0]), 'Y': int(biggest[0][0][1])},
             'Top Right': {'X': int(biggest[1][0][0]), 'Y': int(biggest[1][0][1])},
-            'Bottom Left': {'X': int(biggest[2][0][0]), 'Y': int(biggest[2][0][1])},
+            'Bottom Fisheye': {'X': int(biggest[2][0][0]), 'Y': int(biggest[2][0][1])},
             'Bottom Right': {'X': int(biggest[3][0][0]), 'Y': int(biggest[3][0][1])},
         }
 
