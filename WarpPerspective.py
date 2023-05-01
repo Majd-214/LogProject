@@ -4,21 +4,34 @@ import numpy as np
 import CalibrationUtilities as Utils
 from screeninfo import get_monitors
 
+# Define camera and projection dimensions
 cam_width, cam_height = 1024, 576
+
 screen_width, screen_height = get_monitors()[0].width, get_monitors()[0].height
 
 cap = cv2.VideoCapture(1)
 cap.set(3, cam_width)
 cap.set(4, cam_height)
 
-DIM = (1024, 576)
+# Retrieve camera calibration data from YAML file
+with open('dist/RUNTIME DATA/Resources/Calibration.yaml', 'r') as f:
+    calib_data = yaml.load(f, Loader=yaml.FullLoader)
+
+# Retrieve camera matrix and distortion coefficients for each camera
+K_l = np.array(calib_data['camera_0']['camera_matrix'])
+D_l = np.array(calib_data['camera_0']['dist_coefficients'])
+
+K_r = np.array(calib_data['camera_1']['camera_matrix'])
+D_r = np.array(calib_data['camera_1']['dist_coefficients'])
+
 K = np.array([[797.0118923274562, 0.0, 525.6367078328287],
               [0.0, 800.2609207364642, 280.0906945970121], [0.0, 0.0, 1.0]])
 D = np.array([[-0.0031319388008956553], [-0.6096160899954018], [1.981574230203118], [-2.523538885945794]])
 
 dst = np.float32([[0, 0], [cam_width, 0], [0, cam_height], [cam_width, cam_height]])
 
-matrix_fisheye = cv2.fisheye.estimateNewCameraMatrixForUndistortRectify(K, D, DIM, np.eye(3), balance=0.0)
+matrix_fisheye = cv2.fisheye.estimateNewCameraMatrixForUndistortRectify(
+    K, D, (cam_width, cam_height), np.eye(3), balance=0.0)
 
 Utils.initialize_trackbars()
 
@@ -27,8 +40,6 @@ while True:
     img = cv2.fisheye.undistortImage(img, K, D, None, Knew=matrix_fisheye)
     img = cv2.resize(img, (cam_width, cam_height))
 
-    # imgBlank = np.zeros((cam_width, cam_height, 3), np.uint8)  # CREATE A BLANK IMAGE FOR TESTING DEBUGGING IF
-    # REQUIRED
     imgGray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)  # CONVERT IMAGE TO GRAY SCALE
     imgBlur = cv2.GaussianBlur(imgGray, (5, 5), 1)  # ADD GAUSSIAN BLUR
     threshold = Utils.val_trackbars()  # GET TRACK BAR VALUES FOR THRESHOLDS

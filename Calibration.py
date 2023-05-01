@@ -6,16 +6,16 @@ import yaml
 calibration_data = {}
 
 # Define the chessboard pattern size
-pattern_size = (8, 6)
+pattern_size = (9, 6)
 
 # Define the number of calibration images to use
 num_images = 20
 
 # Define the size of the pattern's squares in units (cm)
-square_size = 2.5
+square_size = 2.2
 
 # Define the camera indexes chosen
-left_camera_index, right_camera_index = 0, 2
+left_camera_index, right_camera_index = 0, 1
 
 # Define the world coordinates of the chessboard corners
 world_coordinates = np.zeros((pattern_size[0] * pattern_size[1], 3), np.float32)
@@ -37,19 +37,22 @@ def calibrate_camera(camera_index):
     # Loop over all calibration images and find chessboard corners
     for i in range(num_images):
         # Load the calibration image
-        img = cv2.imread(f'dist/RUNTIME DATA/Resources/Calibration Images/Fisheye/camera_{camera_index}_calib_{i}.jpg')
+        img = cv2.imread('dist/RUNTIME DATA/Resources/Calibration Images/Fisheye/camera_{}_calib_{}.jpg'
+                         .format(camera_index, i))
 
         # Convert the image to grayscale
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
         # Find the chessboard corners
-        ret_c, corners = cv2.findChessboardCorners(gray, pattern_size, None)
+        ret_c, corners = cv2.findChessboardCorners(gray, pattern_size)
 
         # If the corners are found, add the object points and image points to the lists
         if ret_c:
             obj_points.append(world_coordinates)
             corners = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
             img_points.append(corners)
+
+        print('Iteration: ' + str(i) + ' --> Corners found: ' + str(ret_c))
 
     # Use the object points and image points to perform camera calibration
     ret_c, camera_matrix, dist_coefficients, r_vectors, t_vectors =\
@@ -138,6 +141,7 @@ def main():
 
     # Call the calibrate_stereo function to perform stereo calibration
     calibrate_stereo()
+    print("Successfully Calibrated!")
 
 
 if __name__ == '__main__':
