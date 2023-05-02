@@ -2,6 +2,8 @@ import numpy as np
 import cv2
 import yaml
 
+# Burlington Central High School -- TEJ4M1 'The Log Project' --> 'Touch Screen Projector V2' By: Majd Aburas
+
 # Initialize the calibration data dictionary
 calibration_data = {}
 
@@ -36,9 +38,12 @@ def calibrate_camera(camera_index):
 
     # Loop over all calibration images and find chessboard corners
     for i in range(num_images):
+        # Retrieve Image directory
+        directory = ('dist/RUNTIME DATA/Resources/Calibration Images/Fisheye/camera_{}_calib_{}.jpg'
+                     .format(camera_index, i))
+
         # Load the calibration image
-        img = cv2.imread('dist/RUNTIME DATA/Resources/Calibration Images/Fisheye/camera_{}_calib_{}.jpg'
-                         .format(camera_index, i))
+        img = cv2.imread(directory)
 
         # Convert the image to grayscale
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -52,7 +57,7 @@ def calibrate_camera(camera_index):
             corners = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
             img_points.append(corners)
 
-        print('Iteration: ' + str(i) + ' --> Corners found: ' + str(ret_c))
+        print(directory + ' --> Calibration ' + 'Successful!' if str(ret_c) else 'Failed!')
 
     # Use the object points and image points to perform camera calibration
     ret_c, camera_matrix, dist_coefficients, r_vectors, t_vectors =\
@@ -132,6 +137,9 @@ def calibrate_stereo():
         with open('dist/RUNTIME DATA/Resources/Calibration.yaml', 'w') as f:
             yaml.dump(calibration_data, f)
 
+        # Confirm calibration success
+        print('Stereo Calibration Complete!')
+
 
 # Main function to run the calibration process
 def main():
@@ -141,7 +149,6 @@ def main():
 
     # Call the calibrate_stereo function to perform stereo calibration
     calibrate_stereo()
-    print("Successfully Calibrated!")
 
 
 if __name__ == '__main__':

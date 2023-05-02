@@ -5,6 +5,8 @@ import numpy as np
 from screeninfo import get_monitors
 import HandTrackingModule as Htm
 
+# Burlington Central High School -- TEJ4M1 'The Log Project' --> 'Touch Screen Projector V2' By: Majd Aburas
+
 cam_width, cam_height = 1024, 576
 screen_width, screen_height = get_monitors()[0].width, get_monitors()[0].height
 
