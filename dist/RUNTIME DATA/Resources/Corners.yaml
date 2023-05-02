@@ -1,12 +1,26 @@
-Top Left:
-  X: 206
-  Y: 140
-Top Right:
-  X: 796
-  Y: 95
-Bottom Left:
-  X: 149
-  Y: 470
-Bottom Right:
-  X: 853
-  Y: 453
+Left Camera:
+  Top Fisheye:
+    X: 89
+    Y: 137
+  Top Right:
+    X: 1004
+    Y: 173
+  Bottom Fisheye:
+    X: 288
+    Y: 472
+  Bottom Right:
+    X: 904
+    Y: 454
+Right Camera:
+  Top Fisheye:
+    X: 19
+    Y: 139
+  Top Right:
+    X: 932
+    Y: 244
+  Bottom Fisheye:
+    X: 241
+    Y: 479
+  Bottom Right:
+    X: 831
+    Y: 507

@@ -1,7 +1,7 @@
-import cv2
 import mouse
 import yaml
 import numpy as np
+import cv2
 from screeninfo import get_monitors
 import HandTrackingModule as Htm
 
@@ -84,10 +84,8 @@ detector = Htm.HandDetector(max_hands=1, detection_con=0.2, track_con=0.3)
 
 while True:
     # Read webcam feeds
-    # left_success, left_img = left_capture.read()
-    # right_success, right_img = right_capture.read()
-    left_success, left_img = cv2.imread('dist/RUNTIME DATA/Resources/Calibration Images/Stereo/left.jpg')
-    right_success, right_img = cv2.imread('dist/RUNTIME DATA/Resources/Calibration Images/Stereo/right.jpg')
+    left_success, left_img = left_capture.read()
+    right_success, right_img = right_capture.read()
 
     # Apply fisheye distortion removal to left and right separately
     left_img = cv2.fisheye.undistortImage(left_img, K_l, D_l, None, Knew=left_fisheye_matrix)

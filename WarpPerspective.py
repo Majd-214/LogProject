@@ -1,7 +1,7 @@
-import cv2
 import yaml
 import numpy as np
 import CalibrationUtilities as Utils
+import cv2
 from screeninfo import get_monitors
 
 # Burlington Central High School -- TEJ4M1 'The Log Project' --> 'Touch Screen Projector V2' By: Majd Aburas
@@ -31,11 +31,10 @@ with open('dist/RUNTIME DATA/Resources/Calibration.yaml', 'r') as f:
     calib_data = yaml.load(f, Loader=yaml.FullLoader)
 
 # Retrieve camera matrix and distortion coefficients for each camera
-K_l = np.array(calib_data['camera_0']['camera_matrix'])
-D_l = np.array(calib_data['camera_0']['dist_coefficients'])
-
-K_r = np.array(calib_data['camera_1']['camera_matrix'])
-D_r = np.array(calib_data['camera_1']['dist_coefficients'])
+K_l = np.array(calib_data['camera_0']['K'])
+D_l = np.array(calib_data['camera_0']['D'])
+K_r = np.array(calib_data['camera_1']['K'])
+D_r = np.array(calib_data['camera_1']['D'])
 
 # Calculate the perspective transformation matrix to un-distort webcams' fisheye effect
 left_fisheye_matrix = cv2.fisheye.estimateNewCameraMatrixForUndistortRectify(
@@ -83,7 +82,7 @@ while True:
     left_largest_contour = left_img.copy()  # Copy image for display purposes
     left_contours, left_hierarchy = cv2.findContours(left_threshold, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    right_largest_contour = left_img.copy()  # Copy image for display purposes
+    right_largest_contour = right_img.copy()  # Copy image for display purposes
     right_contours, right_hierarchy = cv2.findContours(right_threshold, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     # Isolate the largest contour by area
