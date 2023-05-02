@@ -15,6 +15,9 @@ left_camera_index, right_camera_index = 0, 1
 # Define the monitor/projector width and height in pixels
 screen_width, screen_height = get_monitors()[0].width, get_monitors()[0].height
 
+# Define the crop offset of the projection in camera pixels
+crop_offset = 80
+
 # Initialize webcam feeds individually
 left_capture = cv2.VideoCapture(left_camera_index)
 right_capture = cv2.VideoCapture(right_camera_index)
@@ -42,6 +45,8 @@ right_fisheye_matrix = cv2.fisheye.estimateNewCameraMatrixForUndistortRectify(
     K_r, D_r, (cam_width, cam_height), np.eye(3), balance=0.0)
 
 dst = np.float32([[0, 0], [cam_width, 0], [0, cam_height], [cam_width, cam_height]])
+mod = np.float32([[crop_offset, crop_offset], [cam_width - crop_offset, crop_offset],
+                  [crop_offset, cam_height - crop_offset], [cam_width - crop_offset, cam_height - crop_offset]])
 
 # Initialize trackbars for contour filtering
 Utils.initialize_trackbars()
