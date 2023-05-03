@@ -67,18 +67,18 @@ def calibrate_camera(camera_index):
     # calculate K & D
     K = np.zeros((3, 3))
     D = np.zeros((4, 1))
-    rvecs = [np.zeros((1, 1, 3), dtype=np.float64) for i in range(num_images)]
-    tvecs = [np.zeros((1, 1, 3), dtype=np.float64) for i in range(num_images)]
+    r_vec = [np.zeros((1, 1, 3), dtype=np.float64) for i in range(num_images)]
+    t_vec = [np.zeros((1, 1, 3), dtype=np.float64) for i in range(num_images)]
 
     # Use the object points and image points to perform camera calibration
-    retval, K, D, rvecs, tvecs = cv2.fisheye.calibrate(
+    retval, K, D, r_vec, t_vec = cv2.fisheye.calibrate(
         obj_points,
         img_points,
         gray.shape[::-1],
         K,
         D,
-        rvecs,
-        tvecs,
+        r_vec,
+        t_vec,
         calibration_flags,
         (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 1e-6))
 

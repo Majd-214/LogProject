@@ -1,24 +1,24 @@
 Left Camera:
-  Top Fisheye:
+  Top Left:
     X: 89
     Y: 137
   Top Right:
     X: 1004
     Y: 173
-  Bottom Fisheye:
+  Bottom Left:
     X: 288
     Y: 472
   Bottom Right:
     X: 904
     Y: 454
 Right Camera:
-  Top Fisheye:
+  Top Left:
     X: 19
     Y: 139
   Top Right:
     X: 932
     Y: 244
-  Bottom Fisheye:
+  Bottom Left:
     X: 241
     Y: 479
   Bottom Right:
