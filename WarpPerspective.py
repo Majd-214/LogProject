@@ -99,5 +99,5 @@ while True:
 
             # Exit program
             break
-        else:
-            print('No camera feed(s) found, Please double check connections or restart device!')
+    else:
+        print('No camera feed(s) found, Please double check connections or restart device!')
