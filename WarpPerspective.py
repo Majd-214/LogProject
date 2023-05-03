@@ -10,7 +10,7 @@ from screeninfo import get_monitors
 cam_width, cam_height = 1024, 576
 
 # Define the camera indexes chosen
-left_camera, right_camera = 0, 1
+camera_index = 0
 
 # Define the monitor/projector width and height in pixels
 screen_width, screen_height = get_monitors()[0].width, get_monitors()[0].height
@@ -19,7 +19,7 @@ screen_width, screen_height = get_monitors()[0].width, get_monitors()[0].height
 crop_offset = 80
 
 # Initialize webcam feeds individually
-capture = cv2.VideoCapture(left_camera)
+capture = cv2.VideoCapture(camera_index)
 capture.set(3, cam_width)
 capture.set(4, cam_height)
 

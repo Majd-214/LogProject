@@ -16,8 +16,8 @@ num_images = 20
 # Define the size of the pattern's squares in units (cm)
 square_size = 2.2
 
-# Define the camera indexes chosen
-left_camera_index, right_camera_index = 0, 1
+# Define the camera index chosen
+webcam_index = 0
 
 # Define the world coordinates of the chessboard corners
 world_coordinates = np.zeros((1, pattern_size[0] * pattern_size[1], 3), np.float32)
@@ -158,22 +158,17 @@ def calibrate_stereo():
             'Q': q.tolist()
         }
 
-        # Save the calibration data to a YAML file
-        with open('dist/RUNTIME DATA/Resources/Calibration.yaml', 'w') as f:
-            yaml.dump(calibration_data, f)
-
-        # Confirm calibration success
-        print('Stereo Calibration Complete!')
-
 
 # Main function to run the calibration process
 def main():
     # Call the calibrate_camera function for each camera
-    calibrate_camera(left_camera_index)
-    calibrate_camera(right_camera_index)
+    calibrate_camera(webcam_index)
 
-    # Call the calibrate_stereo function to perform stereo calibration
-    calibrate_stereo()
+    # Save the calibration data to a YAML file
+    with open('dist/RUNTIME DATA/Resources/Calibration.yaml', 'w') as f:
+        yaml.dump(calibration_data, f)
+
+    print('Fisheye Calibration Successful!')
 
 
 if __name__ == '__main__':
