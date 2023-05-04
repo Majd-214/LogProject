@@ -42,7 +42,7 @@ class HandDetector:
             for lm_id, lm in enumerate(my_hand.landmark):
                 # print(id, lm)
                 h, w, c = img.shape
-                cx, cy, cz = int(lm.x * w), int(lm.y * h), int(lm.z * 2 * w)
+                cx, cy, cz = int(lm.x * w), int(lm.y * h), round(lm.z * 200)
                 x_list.append(cx)
                 y_list.append(cy)
                 z_list.append(cz)

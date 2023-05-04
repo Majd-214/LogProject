@@ -1,12 +1,12 @@
 Top Left:
-  X: 0
-  Y: 0
+  X: 99
+  Y: 112
 Top Right:
-  X: 1024
-  Y: 0
+  X: 973
+  Y: 84
 Bottom Left:
-  X: 0
-  Y: 576
+  X: 198
+  Y: 469
 Bottom Right:
-  X: 1024
-  Y: 576
+  X: 892
+  Y: 436

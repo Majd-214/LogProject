@@ -75,16 +75,17 @@ while True:
         landmarks, bounding_box = detector.find_position(img, draw_lm=False)
 
         if len(landmarks) != 0:
-            landmark = np.array([[landmarks[8][1], landmarks[8][2], landmarks[8][3]]], dtype=np.float32)
-            # transformed = cv2.perspectiveTransform(landmark, tracking_matrix)
-            # x = np.interp(transformed[0][0][0], (0, cam_width), (0, screen_width))
-            # y = np.interp(transformed[0][0][1], (0, cam_height), (0, screen_height))
-            # p_after = (int(x), int(y))
-            # mouse.move(int(x), int(y))
-            print(round(landmark[0][2] / 10))
+            landmark = np.array([[[landmarks[8][1], landmarks[8][2]]]], dtype=np.float32)
+            transformed = cv2.perspectiveTransform(landmark, tracking_matrix)
+            x = np.interp(transformed[0][0][0], (0, cam_width), (0, screen_width))
+            y = np.interp(transformed[0][0][1], (0, cam_height), (0, screen_height))
+            z = landmarks[8][3]
+            mouse.move(int(x), int(y))
+            if detector.fingers_up()[0] == 0:
+                mouse.click()
         for x in range(0, 4):
             cv2.circle(img, (int(contour[x][0]), int(contour[x][1])), 1, (0, 255, 0), cv2.FILLED)
 
         # final_img = cv2.warpPerspective(img, tracking_matrix, (cam_width, cam_height))
         cv2.imshow('Webcam Feed', img)
-        cv2.waitKey(10)
+        cv2.waitKey(1)

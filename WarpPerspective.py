@@ -49,7 +49,7 @@ while True:
     if success:
         # Apply fisheye distortion removal to left and right separately
         img = cv2.fisheye.undistortImage(img, K, D, None, Knew=fisheye_matrix)
-        img = cv2.resize(img, (cam_width, cam_height))
+        img = cv2.resize(img, (1024, 576))
 
         # Retrieve trackbar values for thresholding
         threshold = Utils.val_trackbars()
