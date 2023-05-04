@@ -8,7 +8,13 @@ import HandTrackingModule as Htm
 # Burlington Central High School -- TEJ4M1 'The Log Project' --> 'Touch Screen Projector V2' By: Majd Aburas
 
 # Define camera and projection dimensions in pixels
-cam_width, cam_height = 1024, 576
+cam_width, cam_height = 1920, 1080
+
+# Define desired dimensions
+width, height = 1024, 576
+
+# Define maximum frame rate
+max_frame_rate = 20
 
 # Define the camera indexes chosen
 camera_index = 0
@@ -54,7 +60,7 @@ contour = np.float32([(corners['Top Left']['X'], corners['Top Left']['Y']),
 tracking_matrix = cv2.getPerspectiveTransform(contour, dst)
 
 # Initialize hand tracker
-detector = Htm.HandDetector(max_hands=1, detection_con=0.2, track_con=0.3)
+detector = Htm.HandDetector(max_hands=1, detection_con=0.3, track_con=0.4)
 
 while True:
     # Read webcam feeds
@@ -62,26 +68,23 @@ while True:
 
     # Apply fisheye distortion removal to left and right separately
     img = cv2.fisheye.undistortImage(img, K, D, None, Knew=fisheye_matrix)
-    img = cv2.resize(img, (cam_width, cam_height))
+    img = cv2.resize(img, (width, height))
 
     if success:
         img = detector.find_hands(img)
         landmarks, bounding_box = detector.find_position(img, draw_lm=False)
 
         if len(landmarks) != 0:
-            landmark = np.array([[landmarks[8][1], landmarks[8][2]]], dtype=np.float32)
-            p = (landmarks[8][1], landmarks[8][2])
-            px = (tracking_matrix[0][0] * p[0] + tracking_matrix[0][1] * p[1] + tracking_matrix[0][2]) / (
-                (tracking_matrix[2][0] * p[0] + tracking_matrix[2][1] * p[1] + tracking_matrix[2][2]))
-            py = (tracking_matrix[1][0] * p[0] + tracking_matrix[1][1] * p[1] + tracking_matrix[1][2]) / (
-                (tracking_matrix[2][0] * p[0] + tracking_matrix[2][1] * p[1] + tracking_matrix[2][2]))
-            x = np.interp(int(px), (0, cam_width), (0, screen_width))
-            y = np.interp(int(py), (0, cam_height), (0, screen_height))
-            p_after = (int(x), int(y))
-            mouse.move(int(x), int(y))
+            landmark = np.array([[landmarks[8][1], landmarks[8][2], landmarks[8][3]]], dtype=np.float32)
+            # transformed = cv2.perspectiveTransform(landmark, tracking_matrix)
+            # x = np.interp(transformed[0][0][0], (0, cam_width), (0, screen_width))
+            # y = np.interp(transformed[0][0][1], (0, cam_height), (0, screen_height))
+            # p_after = (int(x), int(y))
+            # mouse.move(int(x), int(y))
+            print(round(landmark[0][2] / 10))
         for x in range(0, 4):
             cv2.circle(img, (int(contour[x][0]), int(contour[x][1])), 1, (0, 255, 0), cv2.FILLED)
 
         # final_img = cv2.warpPerspective(img, tracking_matrix, (cam_width, cam_height))
         cv2.imshow('Webcam Feed', img)
-        cv2.waitKey(1)
+        cv2.waitKey(10)

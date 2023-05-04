@@ -7,7 +7,7 @@ from screeninfo import get_monitors
 # Burlington Central High School -- TEJ4M1 'The Log Project' --> 'Touch Screen Projector V2' By: Majd Aburas
 
 # Define camera and projection dimensions in pixels
-cam_width, cam_height = 1024, 576
+cam_width, cam_height = 1920, 1080
 
 # Define the camera indexes chosen
 camera_index = 0
@@ -83,12 +83,20 @@ while True:
 
         # SAVE IMAGE WHEN 's' key is pressed
         if cv2.waitKey(1) & 0xFF == ord('s'):
-            data = {
-                'Top Left': {'X': int(largest[0][0][0]), 'Y': int(largest[0][0][1])},
-                'Top Right': {'X': int(largest[1][0][0]), 'Y': int(largest[1][0][1])},
-                'Bottom Left': {'X': int(largest[2][0][0]), 'Y': int(largest[2][0][1])},
-                'Bottom Right': {'X': int(largest[3][0][0]), 'Y': int(largest[3][0][1])},
-            }
+            if largest.size > 0:
+                data = {
+                    'Top Left': {'X': int(largest[0][0][0]), 'Y': int(largest[0][0][1])},
+                    'Top Right': {'X': int(largest[1][0][0]), 'Y': int(largest[1][0][1])},
+                    'Bottom Left': {'X': int(largest[2][0][0]), 'Y': int(largest[2][0][1])},
+                    'Bottom Right': {'X': int(largest[3][0][0]), 'Y': int(largest[3][0][1])},
+                }
+            else:
+                data = {
+                    'Top Left': {'X': 0, 'Y': 0},
+                    'Top Right': {'X': cam_width, 'Y': 0},
+                    'Bottom Left': {'X': 0, 'Y': cam_height},
+                    'Bottom Right': {'X': cam_width, 'Y': cam_height},
+                }
 
             # Writing to Corners.yaml
             with open("dist/RUNTIME DATA/Resources/Corners.yaml", "w") as outfile:

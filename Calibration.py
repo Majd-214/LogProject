@@ -27,7 +27,7 @@ world_coordinates[0, :, :2] = np.mgrid[0:pattern_size[0], 0:pattern_size[1]].T.r
 calibration_flags = cv2.fisheye.CALIB_RECOMPUTE_EXTRINSIC + cv2.fisheye.CALIB_CHECK_COND + cv2.fisheye.CALIB_FIX_SKEW
 
 # Define the termination criteria for the iterative algorithm
-criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
+criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 120, 0.001)
 
 
 # Function to calibrate a single camera
@@ -80,7 +80,7 @@ def calibrate_camera(camera_index):
         r_vec,
         t_vec,
         calibration_flags,
-        (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 1e-6))
+        criteria)
 
     # Use the object points and image points to perform camera calibration
     ret_c, camera_matrix, dist_coefficients, r_vectors, t_vectors = \
@@ -102,10 +102,10 @@ def calibrate_stereo():
     img_r = cv2.imread('dist/RUNTIME DATA/Resources/Calibration Images/Stereo/right.jpg')
 
     # Load the camera matrices and distortion coefficients computed in the calibrate_camera function
-    camera_matrix_l = np.array(calibration_data[f'camera_{left_camera_index}']['camera_matrix'])
-    dist_coefficients_l = np.array(calibration_data[f'camera_{left_camera_index}']['dist_coefficients'])
-    camera_matrix_r = np.array(calibration_data[f'camera_{right_camera_index}']['camera_matrix'])
-    dist_coefficients_r = np.array(calibration_data[f'camera_{right_camera_index}']['dist_coefficients'])
+    camera_matrix_l = np.array(calibration_data[f'camera_{webcam_index}']['camera_matrix'])
+    dist_coefficients_l = np.array(calibration_data[f'camera_{webcam_index}']['dist_coefficients'])
+    camera_matrix_r = np.array(calibration_data[f'camera_{webcam_index}']['camera_matrix'])
+    dist_coefficients_r = np.array(calibration_data[f'camera_{webcam_index}']['dist_coefficients'])
 
     # Un-distort the images using the calibration parameters
     img_l = cv2.undistort(img_l, camera_matrix_l, dist_coefficients_l)
