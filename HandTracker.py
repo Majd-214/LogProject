@@ -4,6 +4,8 @@ import numpy as np
 import cv2
 from screeninfo import get_monitors
 import HandTrackingModule as Htm
+import serial
+import threading
 
 # Burlington Central High School -- TEJ4M1 'The Log Project' --> 'Touch Screen Projector V2' By: Majd Aburas
 
@@ -30,6 +32,10 @@ sensitivity = 20
 
 # initialize previous touch state
 previous_touch_state = False
+
+# Replace with the correct serial port and baud rate
+ser = serial.Serial('COM3', 9600)
+data = ''
 
 # Initialize webcam feeds individually
 capture = cv2.VideoCapture(camera_index)
@@ -86,6 +92,20 @@ def get_touch_sensitivity(image, px, py):
             return 1 / mean_value
 
 
+def serial_scan():
+    global data
+    while True:
+        if ser.in_waiting > 0:
+            data = ser.readline().decode().strip()
+            print(data)
+            if data == 'Touch Detected!':
+                mouse.click()
+
+
+# Create and start the thread
+serial_thread = threading.Thread(target=serial_scan)
+serial_thread.start()
+
 while True:
     # Read webcam feeds
     success, img = capture.read()
@@ -118,7 +138,7 @@ while True:
             sensitivity = 127
 
             # Loop over all contours and check if any have a point with a value greater than the sensitivity threshold
-            print('Touch Sensitivity: ' + str(get_touch_sensitivity(gray, int(x), int(y))))
+            # print('Touch Sensitivity: ' + str(get_touch_sensitivity(gray, int(x), int(y))))
 
         for x in range(0, 4):
             cv2.circle(img, (int(corners[x][0]), int(corners[x][1])), 1, (0, 255, 0), cv2.FILLED)
