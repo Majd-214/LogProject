@@ -3,7 +3,6 @@ import numpy as np
 import CalibrationUtilities as Utils
 import cv2
 from screeninfo import get_monitors
-import vlc
 
 # Burlington Central High School -- TEJ4M1 'The Log Project' --> 'Touch Screen Projector V2' By: Majd Aburas
 
@@ -42,23 +41,6 @@ mod = np.float32([[crop_offset, crop_offset], [cam_width - crop_offset, crop_off
 
 # Initialize trackbars for contour filtering
 Utils.initialize_trackbars()
-
-# Define the parameters of the concentric rings
-x = 500
-y = 500
-num_rings = 5
-radius_step = 50
-
-# Create the rings on a blank image
-img = np.zeros((1000, 1000, 3), np.uint8)
-for i in range(num_rings):
-    cv2.circle(img, (x, y), radius_step * (i+1), (255, 255, 255), 2)
-# Define the media file to be played
-media_file = "path/to/your/media/file.mp4"
-
-# Create the VLC instance and media player
-vlc_instance = vlc.Instance()
-player = vlc_instance.media_player_new()
 
 while True:
     # Read webcam feeds

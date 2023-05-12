@@ -30,8 +30,8 @@ crop_offset = 80
 # initialize sensitivity value
 sensitivity = 20
 
-# initialize previous touch state
-previous_touch_state = False
+# initialize touch state
+touch_state = False
 
 # Replace with the correct serial port and baud rate
 ser = serial.Serial('COM3', 9600)
@@ -94,12 +94,12 @@ def get_touch_sensitivity(image, px, py):
 
 def serial_scan():
     global data
+    global touch_state
     while True:
         if ser.in_waiting > 0:
             data = ser.readline().decode().strip()
-            print(data)
             if data == 'Touch Detected!':
-                mouse.click()
+                touch_state = True
 
 
 # Create and start the thread
@@ -136,6 +136,19 @@ while True:
 
             # Define a sensitivity threshold
             sensitivity = 127
+
+            if touch_state:
+                if detector.fingers_up() == [1, 1, 1, 1, 1]:
+                    print('Double Click!')
+                    mouse.double_click()
+                elif detector.fingers_up()[2] == 1:
+                    print('Right Click!')
+                    mouse.right_click()
+                elif detector.fingers_up()[1] == 1:
+                    print('Click!')
+                    mouse.click()
+
+                touch_state = False
 
             # Loop over all contours and check if any have a point with a value greater than the sensitivity threshold
             # print('Touch Sensitivity: ' + str(get_touch_sensitivity(gray, int(x), int(y))))
