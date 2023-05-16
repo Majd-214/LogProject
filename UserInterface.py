@@ -4,66 +4,87 @@ import vlc
 import mouse
 
 # Define the parameters of the concentric rings
-x = 500
-y = 500
+page = (600, 600, 3)
+x = int(page[0] / 2)
+y = int(page[1] / 2)
 num_rings = 10
 radius_step = 25
-
-# Create the rings on a blank image
-img = np.zeros((1000, 1000, 3), np.uint8)
-for i in range(num_rings):
-    cv2.circle(img, (x, y), radius_step * (i+1), (255, 255, 255), 2)
+ring_thickness = 20
 
 # Define the media files to be played
-media_files = ['demo.mp4'.format(i+1) for i in range(num_rings)]
+media_files = [f'demo.mp4' for i in range(num_rings)]
 
 # Create the VLC instances and media players for each ring
-vlc_instances = [vlc.Instance() for i in range(num_rings)]
-players = [instance.media_player_new() for instance in vlc_instances]
+players = [vlc.MediaPlayer() for _ in range(num_rings)]
+
+# Create the media objects for each file and assign them to the players
+for i in range(num_rings):
+    media = vlc.Media(f'file://{media_files[i]}')
+    players[i].set_media(media)
+
+# Create a blank image to draw the rings on
+ring_img = np.zeros(page, np.uint8)
+
+# Draw the rings on the image
+for i in range(num_rings):
+    cv2.circle(ring_img, (x, y), radius_step * (i+1), (255, 255, 255), ring_thickness)
 
 
 # Define a function to highlight a ring
-def highlight_ring(input_ring):
-    cv2.addWeighted(input_ring, 0.5, input_ring, 0.5, 0, dst=input_ring)
+def highlight_ring(input_ring, index):
+    # Create a new image
+    output_img = input_ring.copy()
+    # Draw the highlighted ring on the new image
+    cv2.circle(output_img, (x, y), radius_step * (index+1), (0, 255, 0), ring_thickness)
+    return output_img
 
 
 # Define a function to un-highlight a ring
-def un_highlight_ring(input_ring):
-    cv2.addWeighted(input_ring, 1, input_ring, 0, 0, dst=input_ring)
+def un_highlight_ring(input_ring, index):
+    # Create a new image
+    output_img = input_ring.copy()
+    # Draw the un-highlighted ring on the new image
+    cv2.circle(output_img, (x, y), radius_step * (index + 1), (255, 255, 255), ring_thickness)
+    return output_img
 
 
-# Create the rings for each media file on separate images
-ring_images = []
+# Define a function to handle the mouse click event
+def handle_mouse_input(event):
+    global current_ring_index
+    global ring_img
 
-for i in range(num_rings):
-    ring_img = np.zeros((1000, 1000, 3), np.uint8)
-    cv2.circle(ring_img, (x, y), radius_step * (i+1), (255, 255, 255), 2)
-    ring_images.append(ring_img)
-
-
-# Define a function to handle the mouse move event
-def handle_mouse_move(event):
-    for j, ring_image in enumerate(ring_images):
-        distance = ((mouse.get_position()[0] - x) ** 2 + (mouse.get_position()[1] - y) ** 2) ** 0.5
+    # Check which ring the mouse is over and stop all other players
+    for j in range(num_rings):
+        distance = ((event.x - x) ** 2 + (event.y - y) ** 2) ** 0.5
         if distance <= (j+1)*radius_step:
-            highlight_ring(ring_image)
-            media = vlc_instances[j].media_new(media_files[j])
-            players[j].set_media(media)
-            players[j].play()
-        else:
-            un_highlight_ring(ring_image)
-            players[j].stop()
+            for k in range(num_rings):
+                if k != j:
+                    players[k].stop()
+                    ring_img = un_highlight_ring(ring_img, k)
+
+            # Highlight the selected ring and play its corresponding media file
+            ring_img = highlight_ring(ring_img.copy(), j)
+            if j == current_ring_index:
+                players[j].stop()
+                current_ring_index = None
+            else:
+                players[j].play()
+                players[j].set_fullscreen(True)
+                current_ring_index = j
 
 
-# Show the concentric rings on the screen and wait for mouse events
-for ring_img in ring_images:
-    cv2.imshow("Concentric Rings", ring_img)
+current_ring_index = None
 
-
+# Wait for the user to press the 'ESC' key
 while True:
-    mouse.on_click(handle_mouse_move)
     if cv2.waitKey(1) == 27:
         break
+
+    # Register the handle_mouse_click() function as a callback for mouse click events
+    mouse.hook(handle_mouse_input)
+
+    # Stack the ring images vertically and show them
+    cv2.imshow("Concentric Rings", ring_img)
 
 # Release the resources
 for player in players:
