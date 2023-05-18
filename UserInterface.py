@@ -1,38 +1,58 @@
 import cv2
 import numpy as np
 import vlc
+import mouse
 
-# Define the parameters of the concentric rings
-page = (600, 600, 3)
-ring_x = int(page[0] / 2)
-ring_y = int(page[1] / 2)
-num_rings = 10
+# Define the parameters of the Log
+num_rings = 12
 radius_step = 25
 ring_thickness = 20
 
 # Define the media files to be played
-media_files = [f'demo.mp4' for i in range(num_rings)]
+media_files = [f'demo.mp4' for _ in range(num_rings)]
 
 # Create the VLC instance and media player
 instance = vlc.Instance()
 player = instance.media_player_new()
 
-# Create a blank image to draw the rings on
-ring_img = np.zeros(page, np.uint8)
+# Clear memory for new window
+cv2.destroyAllWindows()
 
-# Draw the rings on the image
-for i in range(num_rings):
-    cv2.circle(ring_img, (ring_x, ring_y), radius_step * (i + 1), (255, 255, 255), ring_thickness)
+# Create the window used for the ring
+cv2.namedWindow('Log', cv2.WINDOW_FULLSCREEN)
+
+# Find windows dimensions
+window_rect = cv2.getWindowImageRect('Log')
+
+# Find the center of the image
+ring_x = int(window_rect[2] / 2)
+ring_y = int(window_rect[3] / 2)
+
+# Create a blank image to draw the rings on
+ring_img = np.zeros((window_rect[3], window_rect[2], 3), dtype=np.uint8)
+
+# Show the initial image
+cv2.imshow('Log', ring_img)
 
 
 # Define a function to highlight a ring
-def highlight_ring(input_ring, index):
-    return cv2.circle(input_ring.copy(), (ring_x, ring_y), radius_step * (index + 1), (0, 255, 0), ring_thickness)
+def highlight_ring(input_img, index):
+    return cv2.circle(input_img.copy(), (ring_x, ring_y), radius_step * (index + 1), (0, 255, 0), ring_thickness)
 
 
 # Define a function to un-highlight a ring
-def un_highlight_ring(input_ring, index):
-    return cv2.circle(input_ring.copy(), (ring_x, ring_y), radius_step * (index + 1), (255, 255, 255), ring_thickness)
+def un_highlight_ring(input_img, index):
+    return cv2.circle(input_img.copy(), (ring_x, ring_y), radius_step * (index + 1), (255, 255, 255), ring_thickness)
+
+
+def clicked(event):
+    if isinstance(event, mouse.ButtonEvent) and player.is_playing:
+        player.stop()
+
+
+# Draw the rings on the image
+for i in range(num_rings):
+    ring_img = un_highlight_ring(ring_img, i)
 
 
 # Define a callback function to handle mouse events
@@ -53,26 +73,19 @@ def handle_mouse_event(event, x, y, flags, param):
             ring_img = un_highlight_ring(ring_img, j)
 
 
-# Show the concentric rings on the screen
-cv2.imshow('Concentric Rings', ring_img)
-
 # Register the handle_mouse_event() function as a callback for mouse events
-cv2.setMouseCallback('Concentric Rings', handle_mouse_event)
-
-# Flag to indicate whether player is currently playing
-is_playing = False
+cv2.setMouseCallback('Log', handle_mouse_event)
 
 # Wait for the user to press the 'ESC' key
 while True:
     # Check if player is playing
-    if is_playing:
-        if player.get_state() == vlc.State.Ended:
-            player.stop()
-            player.release()
-            is_playing = False
+    if player.get_state() == vlc.State.Ended:
+        player.stop()
 
-    # Show the concentric rings on the screen
-    cv2.imshow('Concentric Rings', ring_img)
+    mouse.on_click(clicked)
+
+    # Show the Log on the screen
+    cv2.imshow('Log', ring_img)
 
     if cv2.waitKey(1) == 27:
         break
