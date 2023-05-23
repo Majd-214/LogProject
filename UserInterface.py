@@ -8,10 +8,17 @@ import screeninfo
 screen = screeninfo.get_monitors()[0]
 
 # Define the parameters of the Log
-num_rings = 20
+num_rings = 22
 radius = int(720 / 2)
 radius_step = int(radius / num_rings)
 ring_thickness = radius_step
+
+# Define year counter parameters
+starting_year = 1920
+ending_year = 2025
+num_years = ending_year - starting_year
+year_increment = int(num_years / (num_rings - 1))
+selected_year = 0
 
 # Create variables to store mouse position
 x, y = 0, 0
@@ -41,14 +48,18 @@ ring_img = np.zeros((screen.height, screen.width, 3), dtype=np.uint8)
 # Define a function to highlight a ring
 def highlight_ring(index):
     global ring_img
+    global selected_year
     clear_rings()
     if index >= 0:
+        selected_year = 'Year: ' + str(int((index * year_increment) + starting_year))
         ring_img = cv2.circle(ring_img, (ring_x, ring_y), radius_step * (index + 1),
-                              (255, 0, 0), ring_thickness, cv2.LINE_AA)
-    cv2.putText(ring_img, str(index),
-            (int(ring_x - cv2.getTextSize(str(index),
-                                          cv2.FONT_HERSHEY_SIMPLEX, 1, 2)[0][0] / 2), int(ring_y / 2)),
-            cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+                              (130, 64, 37), ring_thickness, cv2.LINE_AA)
+    else:
+        selected_year = 'Touch to Begin!'
+    cv2.putText(ring_img, str(selected_year),
+                (int(ring_x - cv2.getTextSize(str(selected_year),
+                                              cv2.FONT_HERSHEY_SIMPLEX, 1, 2)[0][0] / 2), int(ring_y / 2)),
+                cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
 
 
 # Define a function to un-highlight a ring
@@ -57,7 +68,7 @@ def clear_rings():
     ring_img = np.zeros((screen.height, screen.width, 3), dtype=np.uint8)
     for i in range(num_rings):
         ring_img = cv2.circle(ring_img, (ring_x, ring_y), radius_step * (i + 1),
-                              (0, 55, 55), ring_thickness, cv2.LINE_AA)
+                              (27, 182, 252), ring_thickness, cv2.LINE_AA)
 
 
 # Show the initial image
