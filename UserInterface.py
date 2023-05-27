@@ -1,21 +1,26 @@
-import cv2
-import numpy as np
 import vlc
+import numpy as np
+import cv2
 import mouse
+import requests
 import screeninfo
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
+from pytube import YouTube
+import pafy
 
 # Define screen dimension information
 screen = screeninfo.get_monitors()[0]
 
 # Define the parameters of the Log
-num_rings = 22
-radius = int(720 / 2)
+num_rings = 52
+radius = 1000 / 2
 radius_step = int(radius / num_rings)
-ring_thickness = radius_step
+ring_thickness = int(radius_step)
 
 # Define year counter parameters
 starting_year = 1920
-ending_year = 2025
+ending_year = 2024
 num_years = ending_year - starting_year
 year_increment = int(num_years / (num_rings - 1))
 selected_year = 0
@@ -23,12 +28,44 @@ selected_year = 0
 # Create variables to store mouse position
 x, y = 0, 0
 
-# Define the media files to be played
-media_files = [f'demo.mp4' for i in range(num_rings)]
-
 # Create the VLC instance and media player
-instance = vlc.Instance()
+instance = vlc.Instance('--no-video-title-show', '--extraintf', 'dummy', '--ffmpeg-hw')
 player = instance.media_player_new()
+
+
+# Create URL list
+def is_valid_url(input_url):
+    try:
+        received_response = requests.head(input_url)
+        return received_response.status_code == requests.codes.ok
+    except requests.exceptions.RequestException:
+        return False
+
+
+# Set up the credentials
+scope = ['https://www.googleapis.com/auth/spreadsheets']
+credentials = ServiceAccountCredentials.from_json_keyfile_name(
+    'dist/RUNTIME DATA/Resources/bchs-log-data.json', scope)
+
+# Authenticate and create the client
+client = gspread.authorize(credentials)
+
+# Specify the document ID and sheet name
+document_id = '1qDgvbcetqrXAYn734Y_LwQMqHgqy2mmq4H0agc5Z2A4'
+sheet_name = 'Sheet1'
+
+# Open the specific sheet in the document
+spreadsheet = client.open_by_key(document_id)
+worksheet = spreadsheet.worksheet(sheet_name)
+
+# Get all media URLs from the specified column
+media_urls = worksheet.col_values(7)
+media_labels = worksheet.col_values(1)
+
+# Remove empty cells and corresponding labels
+while not str(media_urls[0]).startswith('https:'):
+    del media_urls[0]
+    del media_labels[0]
 
 # Clear memory for new window
 cv2.destroyAllWindows()
@@ -51,13 +88,14 @@ def highlight_ring(index):
     global selected_year
     clear_rings()
     if index >= 0:
-        selected_year = 'Year: ' + str(int((index * year_increment) + starting_year))
+        selected_year = int((index * year_increment) + starting_year)
+        output = 'Year: ' + str(selected_year)
         ring_img = cv2.circle(ring_img, (ring_x, ring_y), radius_step * (index + 1),
                               (130, 64, 37), ring_thickness, cv2.LINE_AA)
     else:
-        selected_year = 'Touch to Begin!'
-    cv2.putText(ring_img, str(selected_year),
-                (int(ring_x - cv2.getTextSize(str(selected_year),
+        output = 'Touch to Begin!'
+    cv2.putText(ring_img, output,
+                (int(ring_x - cv2.getTextSize(output,
                                               cv2.FONT_HERSHEY_SIMPLEX, 1, 2)[0][0] / 2), int(ring_y / 2)),
                 cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
 
@@ -89,11 +127,25 @@ def get_selected_ring():
 # Define a callback function to handle mouse events
 def handle_mouse_click(event, x, y, flags, param):
     index = get_selected_ring()
-    if event == cv2.EVENT_LBUTTONDOWN and index >= 0:
+    video_index = media_labels.index(str(selected_year)) if starting_year <= selected_year <= ending_year else None
+    if video_index is None:
+        return
+    if event == cv2.EVENT_LBUTTONDOWN and 0 <= index < len(media_urls):
         if not player.is_playing():
-            player.set_media(instance.media_new(media_files[index]))
-            player.play()
-            player.set_fullscreen(True)
+            video_url = str(media_urls[video_index])
+            start_time = int(video_url[video_url.find("?t=") + len("?t="):]) if video_url.find("?t=") != -1 else 0
+            try:
+                video = YouTube(video_url)
+            except Exception as e:
+                print(f"Error: {e}")
+            else:
+                best_stream = video.streams.get_highest_resolution()
+                video_url = best_stream.url
+                media = instance.media_new(video_url)
+                media.add_option(f'start-time={start_time}')
+                player.set_media(media)
+                player.play()
+                player.set_fullscreen(True)  # Set player to full screen
 
 
 # Register the handle_mouse_event() function as a callback for mouse events
@@ -102,7 +154,7 @@ cv2.setMouseCallback('Log', handle_mouse_click)
 # Wait for the user to press the 'ESC' key
 while True:
     # Check if player is playing
-    if player.get_state() == 6:
+    if player.get_state() == vlc.State.Ended:
         player.stop()
 
     x, y = mouse.get_position()
