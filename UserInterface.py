@@ -7,15 +7,40 @@ import screeninfo
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from pytube import YouTube
-import pafy
+import sys
+from PyQt5.QtWidgets import QApplication, QGraphicsOpacityEffect, QLabel
+from PyQt5.QtGui import QPixmap
+from PyQt5 import QtCore, QtWidgets
+
+app = QApplication(sys.argv)
+
+# Create a transparent window
+window = QtWidgets.QWidget()
+window.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
+window.setAttribute(QtCore.Qt.WA_TranslucentBackground)
+
+# Load the image with transparency
+image = QPixmap('C:/Users/Majdp/PycharmProjects/LogProject/blank_image.png')
+
+# Create a label and set the image as its pixmap
+label = QLabel(window)
+label.setPixmap(image)
+
+# Resize the window to match the image size
+window.resize(image.width(), image.height())
+
+# Set window opacity
+opacity_effect = QGraphicsOpacityEffect()
+opacity_effect.setOpacity(1.0)  # Adjust the opacity value as needed
+window.setGraphicsEffect(opacity_effect)
 
 # Define screen dimension information
 screen = screeninfo.get_monitors()[0]
 
 # Define the parameters of the Log
 num_rings = 52
-radius = 1000 / 2
-radius_step = int(radius / num_rings)
+radius = 900 / 2
+radius_step = int(round(radius / num_rings))
 ring_thickness = int(radius_step)
 
 # Define year counter parameters
@@ -132,7 +157,7 @@ def handle_mouse_click(event, x, y, flags, param):
         return
     if event == cv2.EVENT_LBUTTONDOWN and 0 <= index < len(media_urls):
         if not player.is_playing():
-            video_url = str(media_urls[video_index])
+            video_url = str(media_urls[video_index + 1])  # TODO remember to restore index
             start_time = int(video_url[video_url.find("?t=") + len("?t="):]) if video_url.find("?t=") != -1 else 0
             try:
                 video = YouTube(video_url)
@@ -146,6 +171,7 @@ def handle_mouse_click(event, x, y, flags, param):
                 player.set_media(media)
                 player.play()
                 player.set_fullscreen(True)  # Set player to full screen
+                window.show()
 
 
 # Register the handle_mouse_event() function as a callback for mouse events
@@ -155,6 +181,7 @@ cv2.setMouseCallback('Log', handle_mouse_click)
 while True:
     # Check if player is playing
     if player.get_state() == vlc.State.Ended:
+        window.hide()
         player.stop()
 
     x, y = mouse.get_position()
@@ -171,3 +198,5 @@ while True:
 # Release the resources
 player.release()
 cv2.destroyAllWindows()
+quit()
+sys.exit(app.exec_())
